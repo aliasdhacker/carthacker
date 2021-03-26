@@ -1,118 +1,165 @@
 package org.acarr;
 
+import org.apache.catalina.LifecycleException;
+import org.apache.catalina.startup.Tomcat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CartHacker {
 
-    private static final int URL_PRODUCT_FILE_ERROR_CODE = -99;
+    public static final int GLOBAL_TIMEOUT = 20000;
 
-    private static String urlFileName = "ProductPageList.txt";
+    public static final String WEBHOOK_ENDPOINT = "webhook/";
 
-    private static String purchaseTrackingFile = "PurchaseTrackingFile.txt";
+    public static final String HTML_ENDPOINT_TO_PREVENT_LOSING_OUR_COLLECTIVE_ASSES = "omfgdonotsendanymoretextmessagesfortheloveofgoditscostingwaytoomuchfuckingmoney";
 
-    private static ArrayList<URL> productURLs = new ArrayList<>();
+    private static final String SID = "ACc00a86b87f3c9913cb49514eb8c9e496";
+
+    private static final String TOKEN= "9bf144d99df2375bd6ee5075bc22eaed";
+
+    private static final String PHONE_ID_1 = "+14152125169";
+
+    public static final int THREAD_WAIT_MINIMUM_BETWEEN_HITS = 3000;
+
+    public static final int THREAD_WAIT_MAX_WAIT_BETWEEN = 15000;
+
+    public static final long THREAD_WAIT_AFTER_FOUND_PRIOR_TO_CHECKING_AGAIN = 60000;
+
+    public static final long MINIMUM_LOOP_TIME_BEST_BUY = 3300;
+
+    public static double BEST_BUY_FILTER_CARDS_BELOW_THIS_DOLLAR_VALUE = 175;
 
     private static final Logger logger = LoggerFactory.getLogger(CartHacker.class);
 
-    public static void main(String[] args) {
+    public static final int DEFAULT_FONT_SIZE = 12;
 
-        logger.info("Loading product URLs from file named {}", urlFileName);
+    public static boolean headlessMode = false;
 
-        loadProductURLsFromFile();
+    public static boolean trackOtherSites = false;
 
-        logger.info("Loaded {} product URLs from file.", productURLs.size());
+    private static Thread t800;
+
+    private static Thread t1000;
+
+    public static Object frame;
+
+    public static boolean useBestBuyAPI = false;
+
+    public static void main(String[] args) throws LifecycleException {
+        System.setProperty("webdriver.gecko.driver", "C:\\Program Files\\Mozilla Firefox\\firefox.exe");
+
+        logger.info(" HELP:     --headless for nogui mode");
+        logger.info("     --NOSSL ");
+        logger.info("    --sslport for sslport");
+        logger.info("    --port  for server nonsecure port");
+        logger.info("    --keystorefile for ssl keystore");
+        logger.info("    --keyalias for keystore cert alias");
+        if (args.length != 0 && args[0].contains("--help")) {
+            System.exit(0);
+        } else if (args.length != 0) {
+            for (int i = 0; i < args.length; i++) {
+                switch (args[i]) {
+                    case "--NOSSL":
+                        TomcatUtility.setSsl(false);
+                        break;
+                    case "--headless":
+                        headlessMode = true;
+                        logger.info("Loading headless mode.");
+                        break;
+                    case "--port":
+                        String serverport = args[i + 1];
+                        logger.info("Loading server insecure port from cmdline: {}", serverport);
+                        TomcatUtility.setServerPort(serverport);
+                        break;
+                    case "--sslport":
+                        String sslport = args[i + 1];
+                        logger.info("Loading sslport from cmdline: {}", sslport);
+                        TomcatUtility.setServerSSLPort(sslport);
+                        break;
+                    case "--keystorefile":
+                        String file = args[i + 1];
+                        logger.info("Loading keystorefile from cmdline: {}", file);
+                        TomcatUtility.setKeystoreFilename(file);
+                        break;
+                    case "--keyalias":
+                        String alias = args[i + 1];
+                        logger.info("Loading key alias from cmdline: {}", alias);
+                        TomcatUtility.setKeystoreAlias(alias);
+                        break;
+                    case "--keystorepass":
+                        String pass = args[i + 1];
+                        logger.info("Loading pass from cmdline. xxx");
+                        TomcatUtility.setKeystorePassword(pass);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        ExecutorService es = Executors.newCachedThreadPool();
+
+        if (TomcatUtility.keystoreNotFound()) {
+            TomcatUtility.setSsl(false);
+        }
 
         logger.info("Testing purchase tracking file...");
-
-        if (hasPurchaseBeenMade()) {
+        if (Utility.hasPurchaseBeenMade()) {
             logger.info("We've already got a card, lets not do this now!");
             System.exit(0);
         }
 
-        // Start the process
-        processMinder();
-    }
 
-    public static void processMinder() {
-        while (true) {
-            for (URL theURL : productURLs) {
-                logger.info("Checking if product in stock for URL: {}", theURL);
-                ProductStockChecker productStockChecker = new ProductStockChecker();
+        Tomcat tomcat = TomcatUtility.createTomcatServer();
+        tomcat.start();
+
+//        List<BaseSiteWithStock> sites = Utility.buildSites();
+
+        ThreadManager tm = new ThreadManager();
+        ThreadManager tm2 = new ThreadManager();
+        t800 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                tm2.monitorBestBuyVIAAPI();
+            }
+        });
+
+        t1000 = new Thread(new Runnable() {
+            @Override
+            public void run() {
                 try {
-                    if (productStockChecker.isProductInStockForURL(theURL)) {
-                        if (productStockChecker.isBHPhoto()) {
-                            BHPhotoCartBuyer bhPhotoCartBuyer = new BHPhotoCartBuyer(theURL);
-
-                            bhPhotoCartBuyer.attemptToPurchase();
-                        } else if (productStockChecker.isASUS()) {
-                            AsusCartBuyer buyer = new AsusCartBuyer(theURL);
-
-                            buyer.attemptToPurchase();
-                        }
-                    }
-                } catch (IOException e) {
-                    logger.error("Error checking product stock, error is: " + e);
-                }
-
-                try {
-                    Thread.sleep(Utility.getRandomTimeLengthForSleep(10000));
+                    tm.monitorStockAtSitesViaHTTP();
                 } catch (InterruptedException e) {
-                    logger.error("Error sleeping.", e);
+                    e.printStackTrace();
                 }
-
-
             }
-        }
-    }
+        });
 
-    public static boolean hasPurchaseBeenMade() {
-        BufferedReader bufferedReader = null;
-        String line = "";
-        try {
-            bufferedReader = new BufferedReader(new FileReader(purchaseTrackingFile));
-            line = bufferedReader.readLine();
-            if (line != null)
-                line = line.trim();
-
-            if (line == null || line.length() == 0) {
-                logger.debug("No purchase has been made according to purchase tracking file.");
-                return false;
-            }
-        } catch (Exception e) {
-            logger.error("Error checking purchase file.", e);
-        }
-
-        logger.debug("We have made a purchase, and the value is: " + line);
-        return true;
-    }
-
-    private static void loadProductURLsFromFile() {
-        BufferedReader bufferedReader = null;
-        try {
-            bufferedReader = new BufferedReader(new FileReader(urlFileName));
-        } catch (Exception e) {
-            logger.error("Error reading the file that contains product page URLS.", e);
-            System.exit(URL_PRODUCT_FILE_ERROR_CODE);
-        }
-        String line = "";
-
-        try {
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line != null && line.trim() != "" && line.toLowerCase().contains("http"))
-                    productURLs.add(new URL(line));
-            }
-        } catch (Exception e) {
-            logger.error("Error decoding the file that contains the product page URLS.", e);
-            System.exit(URL_PRODUCT_FILE_ERROR_CODE);
-        }
+        es.submit(t1000);
+        es.submit(t800);
 
     }
 
+    public static Thread getT800() {
+        return t800;
+    }
+
+    public static Thread getT1000() {
+        return t1000;
+    }
+
+    public static String getSID() {
+        return SID;
+    }
+
+    public static String getTOKEN() {
+        return TOKEN;
+    }
+
+    public static String getPhoneId1() {
+        return PHONE_ID_1;
+    }
 }

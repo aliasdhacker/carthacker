@@ -1,0 +1,49 @@
+{
+  "from": 1,
+  "to": 3,
+  "currentPage": 1,
+  "total": 3,
+  "totalPages": 1,
+  "queryTime": "0.070",
+  "totalTime": "0.074",
+  "partial": false,
+  "canonicalUrl": "/v1/products((search=\"graphics\"&search=\"card\")&onlineAvailability=true&(categoryPath.id=abcat0507002))?show=addToCartUrl,name,sku,thumbnailImage,url,upc,shortDescription,salePrice,regularPrice,shippingCost&sort=name&pageSize=100&format=json&apiKey=qIbqoull72xm69GsEk5m8KnM",
+  "products": [
+    {
+      "addToCartUrl": "https://api.bestbuy.com/click/-/6441554/cart",
+      "name": "NVIDIA - GeForce - RTX NVLINK BRIDGE for 3090 Cards - Space Gray",
+      "sku": 6441554,
+      "thumbnailImage": "https://pisces.bbystatic.com/image2/BestBuy_US/images/products/6441/6441554_s.gif",
+      "url": "https://api.bestbuy.com/click/-/6441554/pdp",
+      "upc": "812674024530",
+      "shortDescription": "GeForce RTX NVLink Bridge 4-Slot version for when there are two empty slots between the cards, compatible with the RTX 3090 only.",
+      "salePrice": 79.99,
+      "regularPrice": 79.99,
+      "shippingCost": 0.00
+    },
+    {
+      "addToCartUrl": "https://api.bestbuy.com/click/-/5901353/cart",
+      "name": "PNY - GeForce GT1030 2GB PCI-E 3.0 Graphics Card - Black",
+      "sku": 5901353,
+      "thumbnailImage": "https://pisces.bbystatic.com/image2/BestBuy_US/images/products/5901/5901353_s.gif",
+      "url": "https://api.bestbuy.com/click/-/5901353/pdp",
+      "upc": "751492607238",
+      "shortDescription": "Accelerate your entire PC experience with the fast, powerful NVIDIA GeForce GT 1030 graphics card. Its award-winning NVIDIA Pascal architecture, powerful graphics engine, and state-of-the-art technologies give you the performance upgrade you need to drive today&#8217;s most demanding PC applications. You can even get easy driver updates and one-click game optimization with GeForce Experience.",
+      "salePrice": 129.99,
+      "regularPrice": 129.99,
+      "shippingCost": 0.00
+    },
+    {
+      "addToCartUrl": "https://api.bestbuy.com/click/-/5092306/cart",
+      "name": "PNY - NVIDIA GeForce GT 710 VERTO 2GB DDR3 PCI Express 2.0 Graphics Card - Black",
+      "sku": 5092306,
+      "thumbnailImage": "https://pisces.bbystatic.com/image2/BestBuy_US/images/products/5092/5092306_s.gif",
+      "url": "https://api.bestbuy.com/click/-/5092306/pdp",
+      "upc": "751492592978",
+      "shortDescription": "2GB DDR3 memory; PCI Express 2.0 interface; DVI, D-Sub and HDMI outputs; 954MHz clock speed; 64-bit memory; GeForce Experience software; Nvidia CUDA technology; Nvidia PureVideo HD technology; Nvidia Fast Approximate Antialiasing Technology (FXAA)",
+      "salePrice": 69.99,
+      "regularPrice": 69.99,
+      "shippingCost": 0.00
+    }
+  ]
+}
